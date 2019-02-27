@@ -1,7 +1,16 @@
 ## Bash prompt with git info
 
+![bash-prompt](bash-prompt.png)
+
 A simple and beautiful bash prompt that also prints some git information, without any other bells and whistles.
 
+- Shows if a git fetch has not been run for 15 minutes with `☇` character
+- Summarizes git status with single letters
+- Shows number of ahead / behind commits with remote branch
+- Shows the current branch
+- Username included in red if running as root
+- Highlights the prompt with a red `⑉` if the exit status of a command > 0
+- Configurable host nickname
 
 ### Install
 
