@@ -6,7 +6,7 @@ A simple and beautiful bash prompt that also prints some git information, withou
 
 - Shows if a git fetch has not been run for 15 minutes with `☇` character
 - Summarizes git status with single letters
-- Shows number of ahead / behind commits with remote branch
+- Shows number of ahead / behind commits with remote branch as f.e. `↑1 ↓1`
 - Shows the current branch
 - Username included in red if running as root
 - Highlights the prompt with a red `⑉` if the exit status of a command > 0
