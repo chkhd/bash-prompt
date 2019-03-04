@@ -112,6 +112,7 @@ gen_ps1 () {
 	local branch
 	local status
 	local git_prompt
+	local venv
 	local root
 	local top
 	local bottom
@@ -145,6 +146,10 @@ gen_ps1 () {
 		[[ -n "$status" ]] && git_prompt+=" ${grey}{ ${status} }${nocol}"
 	fi
 
+	# If venv is active show it
+	venv="${VIRTUAL_ENV}${CONDA_PREFIX}"
+	venv=$([[ -n "$venv" ]] && printf " ${grey}{ ${cyan}${venv##*/} ${grey}}${nocol}" || printf '')
+
 	# Display the username in red if running as root
 	root=''
 	if [[ "$USER" == "root" ]]; then
@@ -154,7 +159,7 @@ gen_ps1 () {
 	top="${grey}┌─{ ${cyan}${MY_HOST_NICKNAME} ${grey}}${root} { ${cyan}\w ${grey}}${nocol}"
 	bottom="${grey}└─${prompt} ${nocol}"
 
-	PS1="${top}${git_prompt}\n${bottom}"
+	PS1="${top}${venv}${git_prompt}\n${bottom}"
 }
 
 unset PS1
