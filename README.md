@@ -9,6 +9,7 @@ A simple and beautiful bash prompt that also prints some git information, withou
 - Shows number of ahead / behind commits with remote branch as f.e. `↑1 ↓1`
 - Shows the current branch
 - Username included in red if running as root
+- Shows virtual environment name if one is activated
 - Highlights the prompt with a red `⑉` if the exit status of a command > 0
 - Configurable host nickname
 
