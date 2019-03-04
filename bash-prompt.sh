@@ -156,6 +156,11 @@ gen_ps1 () {
 		root=" ${grey}{ ${red}root ${grey}}"
 	fi
 
+	# If host nickname is not set use the hostname
+	if [[ -z "$MY_HOST_NICKNAME" ]]; then
+		MY_HOST_NICKNAME=$(hostname -s)
+	fi
+
 	top="${grey}┌─{ ${cyan}${MY_HOST_NICKNAME} ${grey}}${root} { ${cyan}\w ${grey}}${nocol}"
 	bottom="${grey}└─${prompt} ${nocol}"
 
