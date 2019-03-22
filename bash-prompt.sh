@@ -161,8 +161,8 @@ gen_ps1 () {
 		MY_HOST_NICKNAME=$(hostname -s)
 	fi
 
-	top="${grey}┌─{ ${cyan}${MY_HOST_NICKNAME} ${grey}}${root} { ${cyan}\w ${grey}}${nocol}"
-	bottom="${grey}└─${prompt} ${nocol}"
+	top="${grey}{ ${cyan}${MY_HOST_NICKNAME} ${grey}}${root} { ${cyan}\w ${grey}}${nocol}"
+	bottom="${grey}${prompt} ${nocol}"
 
 	PS1="${top}${venv}${git_prompt}\n${bottom}"
 }
