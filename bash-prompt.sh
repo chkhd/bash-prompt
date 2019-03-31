@@ -48,10 +48,12 @@ parse_git_last_fetch () {
 	local f
 	local now
 	local last_fetch
+	local opts
 
+	opts=$([[ $(uname -s) == "Darwin" ]] && printf -- '-f%%m' || printf -- '-c%%Y')
 	f=$(git rev-parse --show-toplevel)
 	now=$(date +%s)
-	last_fetch=$(stat -f%m ${f}/.git/FETCH_HEAD 2> /dev/null || printf '')
+	last_fetch=$(stat ${opts} ${f}/.git/FETCH_HEAD 2> /dev/null || printf '')
 
 	[[ -n "$last_fetch" ]] && [[ $(( now > (last_fetch + 15*60) )) -eq 1 ]] && printf '☇' || printf ''
 }
