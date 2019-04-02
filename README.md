@@ -1,6 +1,6 @@
 ## Bash prompt with git info
 
-![bash-prompt](bash-prompt.png)
+![Screenshot](screenshot.png)
 
 A simple and beautiful bash prompt that also prints some git information, without any other bells and whistles.
 
