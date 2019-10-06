@@ -20,28 +20,28 @@ parse_git_ahead_behind () {
 	local ab
 
 	curr_branch=$(git rev-parse --abbrev-ref HEAD)
-	curr_remote=$(git config branch.${curr_branch}.remote)
+	curr_remote=$(git config branch."${curr_branch}".remote)
 
 	# If the branch is local only, it won't have a remote
-	[[ "$?" -gt 0 ]] && return 1
+	test $? -gt 0 && return 1
 
-	curr_merge_branch=$(git config branch.${curr_branch}.merge | cut -d / -f 3)
-	count=$(git rev-list --left-right --count ${curr_branch}...${curr_remote}/${curr_merge_branch} 2> /dev/null)
+	curr_merge_branch=$(git config branch."${curr_branch}".merge | cut -d / -f 3)
+	count=$(git rev-list --left-right --count "${curr_branch}"..."${curr_remote}"/"${curr_merge_branch}" 2> /dev/null)
 
 	# Might be the first commit which is not pushed yet
-	[[ "$?" -gt 0 ]] && return 1
+	test $? -gt 0 && return 1
 
-	ahead=$(printf "${count}" | cut -f1)
-	behind=$(printf "${count}" | cut -f2)
+	ahead=$(printf "%s" "${count}" | cut -f1)
+	behind=$(printf "%s" "${count}" | cut -f2)
 
 	ab=''
-	[[ "$ahead" -gt 0 ]] && ab+="↑${ahead}"
+	test "$ahead" -gt 0 && ab+="↑${ahead}"
 
 	if [[ "$behind" -gt 0 ]]; then
 		[[ -n "$ab" ]] && ab+=" ↓${behind}" || ab+="↓${behind}"
 	fi
 
-	[[ -n "$ab" ]] && printf "${ab}" || printf ''
+	[[ -n "$ab" ]] && printf "%s" "${ab}" || printf ''
 }
 
 parse_git_last_fetch () {
@@ -53,7 +53,7 @@ parse_git_last_fetch () {
 	opts=$([[ $(uname -s) == "Darwin" ]] && printf -- '-f%%m' || printf -- '-c%%Y')
 	f=$(git rev-parse --show-toplevel)
 	now=$(date +%s)
-	last_fetch=$(stat ${opts} ${f}/.git/FETCH_HEAD 2> /dev/null || printf '')
+	last_fetch=$(stat "${opts}" "${f}"/.git/FETCH_HEAD 2> /dev/null || printf '')
 
 	[[ -n "$last_fetch" ]] && [[ $(( now > (last_fetch + 15*60) )) -eq 1 ]] && printf '☇' || printf ''
 }
@@ -69,7 +69,7 @@ parse_git_status () {
 
 	git status --porcelain | (
 		unset dirty deleted untracked newfile ahead renamed
-		while read line ; do
+		while read -r line ; do
 			case "$line" in
 				'M'*)	dirty='m' ;;
 				'UU'*)	dirty='u' ;;
@@ -82,7 +82,7 @@ parse_git_status () {
 		done
 
 		bits="$dirty$deleted$untracked$newfile$ahead$renamed"
-		[[ -n "$bits" ]] && printf "${bits}" || printf ''
+		[[ -n "$bits" ]] && printf "%s" "${bits}" || printf ''
 	)
 }
 
@@ -98,7 +98,7 @@ gen_git_status () {
 	[[ -n "$ahead_behind" ]] && [[ -n "$status" ]] && status+=" ${ahead_behind}" || status+="${ahead_behind}"
 	[[ -n "$fetch" ]] && [[ -n "$status" ]] && status+=" ${fetch}" || status+="${fetch}"
 
-	printf "${status}"
+	printf "%s" "${status}"
 }
 
 gen_ps1 () {
@@ -106,7 +106,6 @@ gen_ps1 () {
 	local ec="$?"
 
 	local red
-	local green
 	local cyan
 	local grey
 	local nocol
@@ -121,7 +120,6 @@ gen_ps1 () {
 
 	PS1=''
 	red='\[\e[0;31m\]'
-	green='\[\e[0;32m\]'
 	cyan='\[\e[0;96m\]'
 	grey='\[\e[0;90m\]'
 	nocol='\[\e[0m\]'
@@ -139,8 +137,7 @@ gen_ps1 () {
 	branch=''
 	status=''
 
-	is_git_prompt_useful_here
-	if [[ $? -eq 0 ]]; then
+	if is_git_prompt_useful_here; then
 		branch=$(parse_git_branch)
 		status=$(gen_git_status)
 
@@ -150,7 +147,7 @@ gen_ps1 () {
 
 	# If venv is active show it
 	venv="${VIRTUAL_ENV}${CONDA_PREFIX}"
-	venv=$([[ -n "$venv" ]] && printf " ${grey}{ ${cyan}${venv##*/} ${grey}}${nocol}" || printf '')
+	venv=$([[ -n "$venv" ]] && printf " %s{ %s%s %s}%s" "${grey}" "${cyan}" "${venv##*/}" "${grey}" "${nocol}" || printf '')
 
 	# Display the username in red if running as root
 	root=''
@@ -163,10 +160,10 @@ gen_ps1 () {
 		MY_HOST_NICKNAME=$(hostname -s)
 	fi
 
-	top="${grey}{ ${cyan}${MY_HOST_NICKNAME} ${grey}}${root} { ${cyan}\w ${grey}}${nocol}"
+	top="${grey}{ ${cyan}${MY_HOST_NICKNAME} ${grey}}${root} { ${cyan}\\w ${grey}}${nocol}"
 	bottom="${grey}${prompt} ${nocol}"
 
-	PS1="${top}${venv}${git_prompt}\n${bottom}"
+	PS1="${top}${venv}${git_prompt}\\n${bottom}"
 }
 
 unset PS1
