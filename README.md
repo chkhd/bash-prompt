@@ -12,6 +12,7 @@ A simple and beautiful bash prompt that also prints some git information, withou
 - Shows virtual environment name if one is activated
 - Highlights the prompt with a red `⑉` if the exit status of a command > 0
 - Configurable host nickname, if not set hostname will be shown
+- Can display currently active AWS profile, if `$AWS_PROFILE` is set and user sets `$SHOW_AWS_PROFILE`
 
 ### Install
 
@@ -19,6 +20,7 @@ A simple and beautiful bash prompt that also prints some git information, withou
 git clone https://github.com/chkhd/bash-prompt ~/.bash-prompt
 
 echo 'MY_HOST_NICKNAME=whateveryoulike' >> ~/.bashrc
+echo 'SHOW_AWS_PROFILE=true' >> ~/.bashrc
 echo 'source ~/.bash-prompt/bash-prompt.sh' >> ~/.bashrc
 ```
 
