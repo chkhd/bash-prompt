@@ -111,6 +111,7 @@ gen_ps1 () {
 	local nocol
 	local prompt
 	local profile
+	local k8s_context
 	local branch
 	local status
 	local git_prompt
@@ -170,10 +171,15 @@ gen_ps1 () {
 	  fi
 	fi
 
+	# Shows current Kubernetes context if user asked to and there is one
+	if ! test -z "$SHOW_K8S_CONTEXT"; then
+	  k8s_context=$(printf " ${grey}{ k8s/%s }${nocol}" "$(kcx -c)")
+	fi
+
 	top="${grey}{ ${cyan}${MY_HOST_NICKNAME} ${grey}}${root} { ${cyan}\\w ${grey}}${nocol}"
 	bottom="${grey}${prompt} ${nocol}"
 
-	PS1="${top}${profile}${venv}${git_prompt}\\n${bottom}"
+	PS1="${top}${profile}${k8s_context}${venv}${git_prompt}\\n${bottom}"
 }
 
 unset PS1
