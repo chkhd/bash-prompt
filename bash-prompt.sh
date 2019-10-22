@@ -110,6 +110,7 @@ gen_ps1 () {
 	local grey
 	local nocol
 	local prompt
+	local profile
 	local branch
 	local status
 	local git_prompt
@@ -160,10 +161,19 @@ gen_ps1 () {
 		MY_HOST_NICKNAME=$(hostname -s)
 	fi
 
+	# Show AWS profile if user asked to and it is set
+	if ! test -z "$SHOW_AWS_PROFILE"; then
+	  if [[ -z "$AWS_PROFILE" ]]; then
+	    profile=""
+	  else
+	    profile=$(printf " ${grey}{ aws/%s }${nocol}" "$AWS_PROFILE")
+	  fi
+	fi
+
 	top="${grey}{ ${cyan}${MY_HOST_NICKNAME} ${grey}}${root} { ${cyan}\\w ${grey}}${nocol}"
 	bottom="${grey}${prompt} ${nocol}"
 
-	PS1="${top}${venv}${git_prompt}\\n${bottom}"
+	PS1="${top}${profile}${venv}${git_prompt}\\n${bottom}"
 }
 
 unset PS1
