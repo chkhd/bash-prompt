@@ -20,19 +20,19 @@ parse_git_ahead_behind () {
 	local ab
 
 	curr_branch=$(git rev-parse --abbrev-ref HEAD)
-	curr_remote=$(git config branch."${curr_branch}".remote)
+	curr_remote=$(git config branch."$curr_branch".remote)
 
 	# If the branch is local only, it won't have a remote
 	test $? -gt 0 && return 1
 
-	curr_merge_branch=$(git config branch."${curr_branch}".merge | cut -d / -f 3)
-	count=$(git rev-list --left-right --count "${curr_branch}"..."${curr_remote}"/"${curr_merge_branch}" 2> /dev/null)
+	curr_merge_branch=$(git config branch."$curr_branch".merge | cut -d / -f 3)
+	count=$(git rev-list --left-right --count "$curr_branch"..."${curr_remote}/${curr_merge_branch}" 2> /dev/null)
 
 	# Might be the first commit which is not pushed yet
 	test $? -gt 0 && return 1
 
-	ahead=$(printf "%s" "${count}" | cut -f1)
-	behind=$(printf "%s" "${count}" | cut -f2)
+	ahead=$(printf "%s" "$count" | cut -f1)
+	behind=$(printf "%s" "$count" | cut -f2)
 
 	ab=''
 	test "$ahead" -gt 0 && ab+="↑${ahead}"
@@ -41,7 +41,7 @@ parse_git_ahead_behind () {
 		[[ -n "$ab" ]] && ab+=" ↓${behind}" || ab+="↓${behind}"
 	fi
 
-	[[ -n "$ab" ]] && printf "%s" "${ab}" || printf ''
+	[[ -n "$ab" ]] && printf "%s" "$ab" || printf ''
 }
 
 parse_git_last_fetch () {
@@ -53,7 +53,7 @@ parse_git_last_fetch () {
 	opts=$([[ $(uname -s) == "Darwin" ]] && printf -- '-f%%m' || printf -- '-c%%Y')
 	f=$(git rev-parse --show-toplevel)
 	now=$(date +%s)
-	last_fetch=$(stat "${opts}" "${f}"/.git/FETCH_HEAD 2> /dev/null || printf '')
+	last_fetch=$(stat "$opts" "${f}/.git/FETCH_HEAD" 2> /dev/null || printf '')
 
 	[[ -n "$last_fetch" ]] && [[ $(( now > (last_fetch + 15*60) )) -eq 1 ]] && printf '☇' || printf ''
 }
@@ -82,7 +82,7 @@ parse_git_status () {
 		done
 
 		bits="$dirty$deleted$untracked$newfile$ahead$renamed"
-		[[ -n "$bits" ]] && printf "%s" "${bits}" || printf ''
+		[[ -n "$bits" ]] && printf "%s" "$bits" || printf ''
 	)
 }
 
@@ -98,7 +98,7 @@ gen_git_status () {
 	[[ -n "$ahead_behind" ]] && [[ -n "$status" ]] && status+=" ${ahead_behind}" || status+="${ahead_behind}"
 	[[ -n "$fetch" ]] && [[ -n "$status" ]] && status+=" ${fetch}" || status+="${fetch}"
 
-	printf "%s" "${status}"
+	printf "%s" "$status"
 }
 
 gen_ps1 () {
@@ -150,7 +150,7 @@ gen_ps1 () {
 
 	# If venv is active show it
 	venv="${VIRTUAL_ENV}${CONDA_PREFIX}"
-	venv=$([[ -n "$venv" ]] && printf " %s{ %s%s %s}%s" "${grey}" "${cyan}" "${venv##*/}" "${grey}" "${nocol}" || printf '')
+	venv=$([[ -n "$venv" ]] && printf " %s{ %s%s %s}%s" "$grey" "$cyan" "${venv##*/}" "$grey" "$nocol" || printf '')
 
 	# Display the username in red if running as root
 	root=''
