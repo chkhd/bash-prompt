@@ -13,7 +13,7 @@ A simple and beautiful bash prompt that also prints some git information, withou
 - Highlights the prompt with a red `⑉` if the exit status of a command > 0
 - Configurable host nickname, if not set hostname will be shown
 - Can display currently active AWS profile, if `$AWS_PROFILE` is set and user sets `$SHOW_AWS_PROFILE`
-- Can display current Kubernetes context if `$SHOW_K8S_CONTEXT` is set
+- Can display current Kubernetes context and namespace, enable through `$SHOW_K8S_CONTEXT` and `$SHOW_K8S_NS`
 
 ### Install
 
