@@ -26,9 +26,9 @@ parse_git_ahead_behind () {
 	test $? -gt 0 && return 1
 
 	curr_merge_branch=$(git config branch."$curr_branch".merge | cut -d / -f 3)
-	count=$(git rev-list --left-right --count "$curr_branch"..."${curr_remote}/${curr_merge_branch}" 2> /dev/null)
+	count=$(git rev-list --left-right --count "${curr_branch}...${curr_remote}/${curr_merge_branch}" 2> /dev/null)
 
-	# Might be the first commit which is not pushed yet
+	# Might be the first commit, which is not pushed yet
 	test $? -gt 0 && return 1
 
 	ahead=$(printf "%s" "$count" | cut -f1)
@@ -110,8 +110,9 @@ gen_ps1 () {
 	local grey
 	local nocol
 	local prompt
-	local profile
+	local aws_profile
 	local k8s_context
+	local k8s_ns
 	local kube_config
 	local branch
 	local status
@@ -163,25 +164,35 @@ gen_ps1 () {
 		MY_HOST_NICKNAME=$(hostname -s)
 	fi
 
-	# Show AWS profile if user asked to and it is set
+	# Show AWS profile if user asked, and it is set
 	if ! test -z "$SHOW_AWS_PROFILE"; then
 	  if [[ -z "$AWS_PROFILE" ]]; then
-	    profile=""
+	    aws_profile=""
 	  else
-	    profile=$(printf " ${grey}{ aws/%s }${nocol}" "$AWS_PROFILE")
+	    aws_profile=$(printf " ${grey}{ aws: %s }${nocol}" "$AWS_PROFILE")
 	  fi
 	fi
 
-	# Shows current Kubernetes context if user asked to and there is one
-	kube_config="${HOME}/.kube/config"
+	# Shows current Kubernetes context if user asked and there is one
+	kube_config=$(if ! test -z "$KUBECONFIG"; then printf "%s" "$KUBECONFIG"; else printf "%s" "${HOME}/.kube/config"; fi)
 	if ! test -z "$SHOW_K8S_CONTEXT" && ! test -z "$kube_config"; then
-	  k8s_context=$(printf " ${grey}{ k8s/%s }${nocol}" "$(cat ${kube_config} | grep current-context | cut -f2 -d\ )")
+	  k8s_context=$(printf " ${grey}{ k8s: %s }${nocol}" "$(cat ${kube_config} | grep current-context | cut -f2 -d\ )")
+	fi
+
+	# Show Kubernetes namespace if user asked, and it is not default one
+	if ! test -z "$SHOW_K8S_NS"; then
+	  k8s_ns="$(kubectl config view --minify --output 'jsonpath={..namespace}' 2>/dev/null)"
+	  if [[ $k8s_ns != "default" && $k8s_ns != "" ]]; then
+	    k8s_ns=$(printf " ${grey}{ k8s-ns: %s }${nocol}" "$k8s_ns")
+	  else
+	    k8s_ns=""
+	  fi
 	fi
 
 	top="${grey}{ ${cyan}${MY_HOST_NICKNAME} ${grey}}${root} { ${cyan}\\w ${grey}}${nocol}"
 	bottom="${grey}${prompt} ${nocol}"
 
-	PS1="${top}${profile}${k8s_context}${venv}${git_prompt}\\n${bottom}"
+	PS1="${top}${aws_profile}${k8s_context}${k8s_ns}${venv}${git_prompt}\\n${bottom}"
 }
 
 unset PS1
