@@ -174,14 +174,16 @@ gen_ps1 () {
 	fi
 
 	# Shows current Kubernetes context if user asked and there is one
-	kube_config=$(if ! test -z "$KUBECONFIG"; then printf "%s" "$KUBECONFIG"; else printf "%s" "${HOME}/.kube/config"; fi)
+	kube_config="${KUBECONFIG:-${HOME}/.kube/config}"
 	if ! test -z "$SHOW_K8S_CONTEXT" && ! test -z "$kube_config"; then
 	  k8s_context=$(printf " ${grey}{ k8s: %s }${nocol}" "$(cat ${kube_config} | grep current-context | cut -f2 -d\ )")
 	fi
 
 	# Show Kubernetes namespace if user asked, and it is not default one
 	if ! test -z "$SHOW_K8S_NS"; then
-	  k8s_ns="$(kubectl config view --minify --output 'jsonpath={..namespace}' 2>/dev/null)"
+	  # kubectl is super slow on MacOS Mojave, no time to dive in now
+	  #k8s_ns="$(kubectl config view --minify --output 'jsonpath={..namespace}' 2>/dev/null)"
+	  k8s_ns=$(cat "$kube_config" | grep 'current-context' | cut -d\  -f2 | xargs -I% bash -c "cat \"$kube_config\" | yq r -j - | jq -r '.contexts[] | select(.name | contains(\"%\")) | .context.namespace'")
 	  if [[ $k8s_ns != "default" && $k8s_ns != "" ]]; then
 	    k8s_ns=$(printf " ${grey}{ k8s-ns: %s }${nocol}" "$k8s_ns")
 	  else
