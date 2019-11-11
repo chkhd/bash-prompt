@@ -31,8 +31,8 @@ parse_git_ahead_behind () {
 	# Might be the first commit, which is not pushed yet
 	test $? -gt 0 && return 1
 
-	ahead=$(printf "%s" "$count" | cut -f1)
-	behind=$(printf "%s" "$count" | cut -f2)
+	ahead=$(printf "$count" | cut -f1)
+	behind=$(printf "$count" | cut -f2)
 
 	ab=''
 	test "$ahead" -gt 0 && ab+="↑${ahead}"
@@ -41,7 +41,7 @@ parse_git_ahead_behind () {
 		[[ -n "$ab" ]] && ab+=" ↓${behind}" || ab+="↓${behind}"
 	fi
 
-	[[ -n "$ab" ]] && printf "%s" "$ab" || printf ''
+	[[ -n "$ab" ]] && printf "$ab" || printf ''
 }
 
 parse_git_last_fetch () {
@@ -82,7 +82,7 @@ parse_git_status () {
 		done
 
 		bits="$dirty$deleted$untracked$newfile$ahead$renamed"
-		[[ -n "$bits" ]] && printf "%s" "$bits" || printf ''
+		[[ -n "$bits" ]] && printf "$bits" || printf ''
 	)
 }
 
@@ -98,7 +98,7 @@ gen_git_status () {
 	[[ -n "$ahead_behind" ]] && [[ -n "$status" ]] && status+=" ${ahead_behind}" || status+="${ahead_behind}"
 	[[ -n "$fetch" ]] && [[ -n "$status" ]] && status+=" ${fetch}" || status+="${fetch}"
 
-	printf "%s" "$status"
+	printf "$status"
 }
 
 gen_ps1 () {
@@ -173,22 +173,24 @@ gen_ps1 () {
 	  fi
 	fi
 
-	# Shows current Kubernetes context if user asked and there is one
-	kube_config="${KUBECONFIG:-${HOME}/.kube/config}"
-	if ! test -z "$SHOW_K8S_CONTEXT" && ! test -z "$kube_config"; then
-	  k8s_context=$(printf " ${grey}{ k8s: %s }${nocol}" "$(cat ${kube_config} | grep current-context | cut -f2 -d\ )")
+  if ! test -z "$SHOW_K8S_CONTEXT" || ! test -z "$SHOW_K8S_NS"; then
+	  kube_config="${KUBECONFIG:-${HOME}/.kube/config}"
+	  k8s_context=$(cat "$kube_config" | grep current-context | cut -d\  -f2)
 	fi
 
 	# Show Kubernetes namespace if user asked, and it is not default one
 	if ! test -z "$SHOW_K8S_NS"; then
-	  # kubectl is super slow on MacOS Mojave, no time to dive in now
-	  #k8s_ns="$(kubectl config view --minify --output 'jsonpath={..namespace}' 2>/dev/null)"
-	  k8s_ns=$(cat "$kube_config" | grep 'current-context' | cut -d\  -f2 | xargs -I% bash -c "cat \"$kube_config\" | yq r -j - | jq -r '.contexts[] | select(.name | contains(\"%\")) | .context.namespace'")
+	  k8s_ns=$(cat "$kube_config" | yq r -j - | ctx=$k8s_context jq -r '.contexts[] | select(.name | contains($ENV.ctx)) | .context.namespace')
 	  if [[ $k8s_ns != "default" && $k8s_ns != "" ]]; then
 	    k8s_ns=$(printf " ${grey}{ k8s-ns: %s }${nocol}" "$k8s_ns")
 	  else
 	    k8s_ns=""
 	  fi
+	fi
+
+	# Shows current Kubernetes context if user asked and there is one
+	if ! test -z "$SHOW_K8S_CONTEXT" && ! test -z "$kube_config"; then
+	  k8s_context=$(printf " ${grey}{ k8s: %s }${nocol}" "$k8s_context")
 	fi
 
 	top="${grey}{ ${cyan}${MY_HOST_NICKNAME} ${grey}}${root} { ${cyan}\\w ${grey}}${nocol}"
