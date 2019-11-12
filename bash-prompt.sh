@@ -181,7 +181,7 @@ gen_ps1 () {
 	# Show Kubernetes namespace if user asked, and it is not default one
 	if ! test -z "$SHOW_K8S_NS"; then
 	  k8s_ns=$(cat "$kube_config" | yq r -j - | ctx=$k8s_context jq -r '.contexts[] | select(.name | contains($ENV.ctx)) | .context.namespace')
-	  if [[ $k8s_ns != "default" && $k8s_ns != "" ]]; then
+	  if [[ $k8s_ns != "default" && $k8s_ns != "" && $k8s_ns != "null" ]]; then
 	    k8s_ns=$(printf " ${grey}{ k8s-ns: %s }${nocol}" "$k8s_ns")
 	  else
 	    k8s_ns=""
