@@ -126,6 +126,8 @@ gen_ps1 () {
 	red='\[\e[0;31m\]'
 	cyan='\[\e[0;96m\]'
 	grey='\[\e[0;90m\]'
+	yellow='\[\e[1;33m\]'
+	green='\[\e[1;32m\]'
 	nocol='\[\e[0m\]'
 
 	# Indicate if previous command succeeded or not
@@ -189,7 +191,7 @@ gen_ps1 () {
 	  k8s_context=$(printf " ${grey}{ k8s: %s }${nocol}" "$k8s_context")
 	fi
 
-	top="${grey}{ ${cyan}${MY_HOST_NICKNAME} ${grey}}${root} { ${cyan}\\w ${grey}}${nocol}"
+	top="${grey}{ ${yellow}${MY_HOST_NICKNAME} ${grey}}${root} { ${yellow}\\w ${grey}}${nocol}"
 	bottom="${grey}${prompt} ${nocol}"
 
 	PS1="${top}${aws_profile}${k8s_context}${k8s_ns}${venv}${git_prompt}\\n${bottom}"
