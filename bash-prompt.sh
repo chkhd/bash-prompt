@@ -149,7 +149,7 @@ gen_ps1 () {
 
 	# If venv is active show it
 	venv="${VIRTUAL_ENV}${CONDA_PREFIX}"
-	venv=$(test -n "$venv" && printf " %s{ %s%s %s}%s" "$grey" "$cyan" "${venv##*/}" "$grey" "$nocol" || printf '')
+	venv=$(test -n "$venv" && printf " %s{ %s%s %s}%s" "$grey" "$yellow" "${venv##*/}" "$grey" "$nocol" || printf '')
 
 	# Display the username in red if running as root
 	root=''
