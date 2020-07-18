@@ -194,7 +194,7 @@ gen_ps1 () {
 	top="${grey}{ ${yellow}${MY_HOST_NICKNAME} ${grey}}${root} { ${yellow}\\w ${grey}}${nocol}"
 	bottom="${grey}${prompt} ${nocol}"
 
-	PS1="${top}${aws_profile}${k8s_context}${k8s_ns}${venv}${git_prompt}\\n${bottom}"
+	PS1="${top}${venv}${aws_profile}${k8s_context}${k8s_ns}${git_prompt}\\n${bottom}"
 }
 
 unset PS1
