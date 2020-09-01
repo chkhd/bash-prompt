@@ -144,8 +144,10 @@ gen_ps1 () {
 		branch=$(parse_git_branch)
 		status=$(gen_git_status)
 
-		git_prompt=" ${grey}{ ${branch} }${nocol}"
-		test -n "$status" && git_prompt+=" ${grey}{ ${status} }${nocol}"
+
+		git_prompt="${branch}"
+		test -n "$status" && git_prompt+=" ${status}"
+		git_prompt=" ${grey}{ ${git_prompt} }${nocol}"
 	fi
 
 	# If venv is active show it
