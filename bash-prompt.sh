@@ -25,7 +25,7 @@ parse_git_ahead_behind () {
 	# If the branch is local only, it won't have a remote
 	test $? -gt 0 && return 1
 
-	curr_merge_branch=$(git config branch."$curr_branch".merge | cut -d / -f 3)
+	curr_merge_branch=$(git config branch."$curr_branch".merge | sed 's#refs/heads/###' )
 	count=$(git rev-list --left-right --count "${curr_branch}...${curr_remote}/${curr_merge_branch}" 2> /dev/null)
 
 	# Might be the first commit, which is not pushed yet
