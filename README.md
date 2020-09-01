@@ -13,7 +13,9 @@ A simple and beautiful bash prompt that also prints some git information, withou
 - Highlights the prompt with a red `⑉` if the exit status of a command > 0
 - Configurable host nickname, if not set hostname will be shown
 - Can display currently active AWS profile, if `$AWS_PROFILE` is set and user sets `$SHOW_AWS_PROFILE`
-- Can display current Kubernetes context and namespace, enable through `$SHOW_K8S_CONTEXT` and `$SHOW_K8S_NS`
+- Can display current Kubernetes context and namespace, enable through `$SHOW_K8S` and `$SHOW_K8S_NS`.
+
+NOTE: if the K8s context contains `/` in its title, only the part before `/` gets displayed.
 
 ### Install
 
@@ -22,7 +24,7 @@ git clone https://github.com/chkhd/bash-prompt ~/.bash-prompt
 
 echo 'MY_HOST_NICKNAME=whateveryoulike' >> ~/.bashrc
 echo 'SHOW_AWS_PROFILE=true' >> ~/.bashrc
-echo 'SHOW_K8S_CONTEXT=true' >> ~/.bashrc
+echo 'SHOW_K8S=true' >> ~/.bashrc
 
 # If you want to display the namespace install yq[1] and jq[2]
 # brew install jq yq
@@ -31,7 +33,7 @@ echo 'SHOW_K8S_CONTEXT=true' >> ~/.bashrc
 echo 'source ~/.bash-prompt/bash-prompt.sh' >> ~/.bashrc
 ```
 
-[1] https://github.com/mikefarah/yq  
+[1] https://github.com/mikefarah/yq
 [2] https://github.com/stedolan/jq
 
 ### Support

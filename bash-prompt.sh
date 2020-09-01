@@ -113,6 +113,7 @@ gen_ps1 () {
 	local aws_profile
 	local k8s_context
 	local k8s_ns
+	local k8s
 	local kube_config
 	local branch
 	local status
@@ -171,30 +172,28 @@ gen_ps1 () {
 	  fi
 	fi
 
-  if ! test -z "$SHOW_K8S_CONTEXT" || ! test -z "$SHOW_K8S_NS"; then
+  # Shows current Kubernetes context if user asked and there is one
+  if ! test -z "$SHOW_K8S" || ! test -z "$SHOW_K8S_NS"; then
 	  kube_config="${KUBECONFIG:-${HOME}/.kube/config}"
-	  k8s_context=$(cat "$kube_config" | grep current-context | cut -d\  -f2)
-	fi
+	  k8s_context=$(cat "$kube_config" | grep current-context | cut -d\  -f2 | cut -d/ -f1 )
 
-	# Show Kubernetes namespace if user asked, and it is not default one
-	if ! test -z "$SHOW_K8S_NS"; then
-	  k8s_ns=$(cat "$kube_config" | yq r -j - | ctx="$k8s_context" jq -r '.contexts[] | select(.name | contains($ENV.ctx)) | .context.namespace')
-	  if [[ "$k8s_ns" != "default" && "$k8s_ns" != "" && "$k8s_ns" != "null" ]]; then
-	    k8s_ns=$(printf " ${grey}{ k8s-ns: %s }${nocol}" "$k8s_ns")
-	  else
-	    k8s_ns=""
+	  # Show Kubernetes namespace if user asked, and it is not default one
+	  if ! test -z "$SHOW_K8S_NS"; then
+			k8s_ns=$(cat "$kube_config" | yq r -j - | ctx="$k8s_context" jq -r '.contexts[] | select(.name | contains($ENV.ctx)) | .context.namespace')
+			if [[ "$k8s_ns" != "default" && "$k8s_ns" != "" && "$k8s_ns" != "null" ]]; then
+				k8s_ns=$(printf "ns: %s" "$k8s_ns")
+			else
+				k8s_ns=""
+			fi
 	  fi
-	fi
 
-	# Shows current Kubernetes context if user asked and there is one
-	if ! test -z "$SHOW_K8S_CONTEXT" && ! test -z "$kube_config"; then
-	  k8s_context=$(printf " ${grey}{ k8s: %s }${nocol}" "$k8s_context")
+	  k8s=$(printf " ${grey}{ k8s: %s %s }${nocol}" "$k8s_context" "$k8s_ns")
 	fi
 
 	top="${grey}{ ${yellow}${MY_HOST_NICKNAME} ${grey}}${root} { ${yellow}\\w ${grey}}${nocol}"
 	bottom="${grey}${prompt} ${nocol}"
 
-	PS1="${top}${venv}${aws_profile}${k8s_context}${k8s_ns}${git_prompt}\\n${bottom}"
+	PS1="${top}${venv}${aws_profile}${k8s}${git_prompt}\\n${bottom}"
 }
 
 unset PS1
