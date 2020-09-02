@@ -174,24 +174,23 @@ gen_ps1 () {
 	  fi
 	fi
 
-  # Shows current Kubernetes context if user asked and there is one
-  if ! test -z "$SHOW_K8S" || ! test -z "$SHOW_K8S_NS"; then
-	  kube_config="${KUBECONFIG:-${HOME}/.kube/config}"
-	  k8s_context=$(cat "$kube_config" | grep current-context | cut -d\  -f2 | cut -d/ -f1 )
+	# Shows current Kubernetes context if user asked and there is one
+	if ! test -z "$SHOW_K8S" || ! test -z "$SHOW_K8S_NS"; then
+		kube_config="${KUBECONFIG:-${HOME}/.kube/config}"
+		k8s_context=$(cat "$kube_config" | grep current-context | cut -d\  -f2 | cut -d/ -f1 )
 
-	  # Show Kubernetes namespace if user asked, and it is not default one
-	  if ! test -z "$SHOW_K8S_NS"; then
+		# Show Kubernetes namespace if user asked, and it is not default one
+		if ! test -z "$SHOW_K8S_NS"; then
 			k8s_ns=$(cat "$kube_config" | yq r -j - | ctx="$k8s_context" jq -r '.contexts[] | select(.name | contains($ENV.ctx)) | .context.namespace')
 			if [[ "$k8s_ns" != "default" && "$k8s_ns" != "" && "$k8s_ns" != "null" ]]; then
 				k8s_ns=$(printf " ns: %s" "$k8s_ns")
 			else
 				k8s_ns=""
 			fi
-	  fi
+		fi
 
-    test ! -z "$SHOW_K8S" && k8s_context="k8s: ${k8s_context}" || k8s_context=""
-
-	  k8s=" ${grey}{ ${k8s_context}${k8s_ns} }${nocol}"
+		test ! -z "$SHOW_K8S" && k8s_context="k8s: ${k8s_context}" || k8s_context=""
+		k8s=" ${grey}{ ${k8s_context}${k8s_ns} }${nocol}"
 	fi
 
 	top="${grey}{ ${yellow}${MY_HOST_NICKNAME} ${grey}}${root} { ${yellow}\\w ${grey}}${nocol}"
