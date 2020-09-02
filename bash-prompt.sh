@@ -183,13 +183,15 @@ gen_ps1 () {
 	  if ! test -z "$SHOW_K8S_NS"; then
 			k8s_ns=$(cat "$kube_config" | yq r -j - | ctx="$k8s_context" jq -r '.contexts[] | select(.name | contains($ENV.ctx)) | .context.namespace')
 			if [[ "$k8s_ns" != "default" && "$k8s_ns" != "" && "$k8s_ns" != "null" ]]; then
-				k8s_ns=$(printf "ns: %s" "$k8s_ns")
+				k8s_ns=$(printf " ns: %s" "$k8s_ns")
 			else
 				k8s_ns=""
 			fi
 	  fi
 
-	  k8s=$(printf " ${grey}{ k8s: %s %s }${nocol}" "$k8s_context" "$k8s_ns")
+    test ! -z "$SHOW_K8S" && k8s_context="k8s: ${k8s_context}" || k8s_context=""
+
+	  k8s=" ${grey}{ ${k8s_context}${k8s_ns} }${nocol}"
 	fi
 
 	top="${grey}{ ${yellow}${MY_HOST_NICKNAME} ${grey}}${root} { ${yellow}\\w ${grey}}${nocol}"
