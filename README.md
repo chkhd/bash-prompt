@@ -33,7 +33,7 @@ echo 'SHOW_K8S=true' >> ~/.bashrc
 echo 'source ~/.bash-prompt/bash-prompt.sh' >> ~/.bashrc
 ```
 
-[1] https://github.com/mikefarah/yq
+[1] https://github.com/mikefarah/yq  
 [2] https://github.com/stedolan/jq
 
 ### Support
