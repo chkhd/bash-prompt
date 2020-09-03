@@ -170,7 +170,7 @@ gen_ps1 () {
 	  if test -z "$AWS_PROFILE"; then
 	    aws_profile=""
 	  else
-	    aws_profile=$(printf " ${grey}{ aws: %s }${nocol}" "$AWS_PROFILE")
+	    aws_profile=$(printf " { %s }" "$AWS_PROFILE")
 	  fi
 	fi
 
@@ -183,20 +183,20 @@ gen_ps1 () {
 		if ! test -z "$SHOW_K8S_NS"; then
 			k8s_ns=$(cat "$kube_config" | yq r -j - | ctx="$k8s_context" jq -r '.contexts[] | select(.name | contains($ENV.ctx)) | .context.namespace')
 			if [[ "$k8s_ns" != "default" && "$k8s_ns" != "" && "$k8s_ns" != "null" ]]; then
-				k8s_ns=$(printf " ns: %s" "$k8s_ns")
+				k8s_ns=$(printf " %s" "$k8s_ns")
 			else
 				k8s_ns=""
 			fi
 		fi
 
-		test ! -z "$SHOW_K8S" && k8s_context="k8s: ${k8s_context}" || k8s_context=""
-		k8s=" ${grey}{ ${k8s_context}${k8s_ns} }${nocol}"
+		test ! -z "$SHOW_K8S" && k8s_context="${k8s_context}:" || k8s_context=""
+		k8s=" { ${k8s_context}${k8s_ns} }"
 	fi
 
 	top="${grey}{ ${yellow}${MY_HOST_NICKNAME} ${grey}}${root} { ${yellow}\\w ${grey}}${nocol}"
 	bottom="${grey}${prompt} ${nocol}"
 
-	PS1="${top}${venv}${aws_profile}${k8s}${git_prompt}\\n${bottom}"
+	PS1="${top}${venv}${cyan}${aws_profile}${green}${k8s}${grey}${git_prompt}\\n${bottom}"
 }
 
 unset PS1
