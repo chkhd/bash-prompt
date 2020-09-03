@@ -117,6 +117,9 @@ gen_ps1 () {
 	local kube_config
 	local branch
 	local status
+	local div
+	local mdiv
+	local ediv
 	local git_prompt
 	local venv
 	local root
@@ -132,8 +135,11 @@ gen_ps1 () {
 	nocol='\[\e[0m\]'
 
 	# Indicate if previous command succeeded or not
-	prompt='⑉'
-	test ${ec} -eq 0 && prompt="${grey}${prompt}" || prompt="${red}${prompt}"
+	prompt='$ '
+	div='| '
+	mdiv='⎨ '
+	ediv=' ⎬'
+	test ${ec} -eq 0 && prompt="${prompt}" || prompt="${red}${prompt}"
 
 	# If inside git managed directory show git information
 	git_prompt=''
@@ -147,17 +153,17 @@ gen_ps1 () {
 
 		git_prompt="${branch}"
 		test -n "$status" && git_prompt+=" ${status}"
-		git_prompt=" ${grey}{ ${git_prompt} }${nocol}"
+		git_prompt=" ${div}${grey}${git_prompt}${nocol}"
 	fi
 
 	# If venv is active show it
 	venv="${VIRTUAL_ENV}${CONDA_PREFIX}"
-	venv=$(test -n "$venv" && printf " %s{ %s%s %s}%s" "$grey" "$yellow" "${venv##*/}" "$grey" "$nocol" || printf '')
+	venv=$(test -n "$venv" && printf " ${div}${yellow}${venv##*/}${nocol}" || printf '')
 
 	# Display the username in red if running as root
 	root=''
 	if test "$USER" == "root"; then
-		root=" ${grey}{ ${red}root ${grey}}"
+		root=" ${nocol}${div}${red}root${nocol}"
 	fi
 
 	# If host nickname is not set use the hostname
@@ -170,7 +176,7 @@ gen_ps1 () {
 	  if test -z "$AWS_PROFILE"; then
 	    aws_profile=""
 	  else
-	    aws_profile=$(printf " { %s }" "$AWS_PROFILE")
+	    aws_profile=$(printf " ${div}${cyan}%s${nocol}" "$AWS_PROFILE")
 	  fi
 	fi
 
@@ -190,13 +196,13 @@ gen_ps1 () {
 		fi
 
 		test ! -z "$SHOW_K8S" && k8s_context="${k8s_context}:" || k8s_context=""
-		k8s=" { ${k8s_context}${k8s_ns} }"
+		k8s=" ${div}${green}${k8s_context}${k8s_ns}${nocol}"
 	fi
 
-	top="${grey}{ ${yellow}${MY_HOST_NICKNAME} ${grey}}${root} { ${yellow}\\w ${grey}}${nocol}"
-	bottom="${grey}${prompt} ${nocol}"
+	top="${mdiv}${grey}${yellow}${MY_HOST_NICKNAME}${nocol}${root}"
+	bottom="${prompt}${nocol}"
 
-	PS1="${top}${venv}${cyan}${aws_profile}${green}${k8s}${grey}${git_prompt}\\n${bottom}"
+	PS1="${top}${venv}${aws_profile}${k8s}${git_prompt} ${div}${grey}\\w${nocol}${ediv}\\n${bottom}"
 }
 
 unset PS1
