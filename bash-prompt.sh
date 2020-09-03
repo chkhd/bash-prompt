@@ -116,9 +116,15 @@ gen_ps1 () {
 	local k8s
 	local kube_config
 	local branch
+	local black
+	local blue
+	local brown
+	local bright_cyan
+	local bright_green
 	local status
 	local div
 	local mdiv
+	local magenta
 	local ediv
 	local git_prompt
 	local venv
@@ -127,16 +133,22 @@ gen_ps1 () {
 	local bottom
 
 	PS1=''
-	red='\[\e[0;31m\]'
-	cyan='\[\e[0;96m\]'
-	grey='\[\e[0;90m\]'
-	yellow='\[\e[1;33m\]'
-	green='\[\e[1;32m\]'
+	black='\[\e[0;30m\]'
+	red='\[\e[38;5;9m\]'
+	cyan='\[\e[38;5;80m\]'
+	bright_cyan='\[\e[38;5;111m\]'
+	blue='\[\e[0;34m\]'
+	grey='\[\e[38;5;242m\]'
+	yellow='\[\e[38;5;184m\]'
+	green='\[\e[38;5;77m\]'
+	bright_green='\[\e[38;5;157m\]'
+	magenta='\[\e[38;5;140m\]'
+	brown='\[\e[38;5;137m\]'
 	nocol='\[\e[0m\]'
 
 	# Indicate if previous command succeeded or not
 	prompt='$ '
-	div='| '
+	div="${grey}|${nocol} "
 	mdiv='⎨ '
 	ediv=' ⎬'
 	test ${ec} -eq 0 && prompt="${prompt}" || prompt="${red}${prompt}"
@@ -152,8 +164,8 @@ gen_ps1 () {
 
 
 		git_prompt="${branch}"
-		test -n "$status" && git_prompt+=" ${status}"
-		git_prompt=" ${div}${grey}${git_prompt}${nocol}"
+		test -n "$status" && git_prompt+=" ${bright_cyan}${status}${nocol}"
+		git_prompt=" ${div}${cyan}${git_prompt}${nocol}"
 	fi
 
 	# If venv is active show it
@@ -176,7 +188,7 @@ gen_ps1 () {
 	  if test -z "$AWS_PROFILE"; then
 	    aws_profile=""
 	  else
-	    aws_profile=$(printf " ${div}${cyan}%s${nocol}" "$AWS_PROFILE")
+	    aws_profile=$(printf " ${div}${bright_cyan}%s${nocol}" "$AWS_PROFILE")
 	  fi
 	fi
 
@@ -196,13 +208,13 @@ gen_ps1 () {
 		fi
 
 		test ! -z "$SHOW_K8S" && k8s_context="${k8s_context}:" || k8s_context=""
-		k8s=" ${div}${green}${k8s_context}${k8s_ns}${nocol}"
+		k8s=" ${div}${green}${k8s_context}${bright_green}${k8s_ns}${nocol}"
 	fi
 
-	top="${mdiv}${grey}${yellow}${MY_HOST_NICKNAME}${nocol}${root}"
+	top="${mdiv}${magenta}${MY_HOST_NICKNAME}${nocol}${root}"
 	bottom="${prompt}${nocol}"
 
-	PS1="${top}${venv}${aws_profile}${k8s}${git_prompt} ${div}${grey}\\w${nocol}${ediv}\\n${bottom}"
+	PS1="${top}${venv}${aws_profile}${k8s}${git_prompt} ${div}${brown}\\w${nocol}${ediv}\\n${bottom}"
 }
 
 unset PS1
