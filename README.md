@@ -26,15 +26,14 @@ echo 'MY_HOST_NICKNAME=whateveryoulike' >> ~/.bashrc
 echo 'SHOW_AWS_PROFILE=true' >> ~/.bashrc
 echo 'SHOW_K8S=true' >> ~/.bashrc
 
-# If you want to display the namespace install yq[1] and jq[2]
+# If you want to display the namespace install jq[1]
 # brew install jq yq
 # echo 'SHOW_K8S_NS=true' >> ~/.bashrc
 
 echo 'source ~/.bash-prompt/bash-prompt.sh' >> ~/.bashrc
 ```
 
-[1] https://github.com/mikefarah/yq  
-[2] https://github.com/stedolan/jq
+[1] https://github.com/stedolan/jq
 
 ### Support
 

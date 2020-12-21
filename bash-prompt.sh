@@ -120,7 +120,7 @@ gen_ps1 () {
 	local blue
 	local brown
 	local bright_cyan
-	local bright_green
+	local orange
 	local status
 	local div
 	local mdiv
@@ -134,14 +134,14 @@ gen_ps1 () {
 
 	PS1=''
 	black='\[\e[0;30m\]'
-	red='\[\e[38;5;9m\]'
+	red='\[\e[38;5;160m\]'
 	cyan='\[\e[38;5;80m\]'
-	bright_cyan='\[\e[38;5;111m\]'
+	bright_cyan='\[\e[38;5;110m\]'
 	blue='\[\e[0;34m\]'
 	grey='\[\e[38;5;242m\]'
-	yellow='\[\e[38;5;184m\]'
-	green='\[\e[38;5;77m\]'
-	bright_green='\[\e[38;5;157m\]'
+	yellow='\[\e[38;5;178m\]'
+	green='\[\e[38;5;70m\]'
+	orange='\[\e[38;5;142m\]'
 	magenta='\[\e[38;5;140m\]'
 	brown='\[\e[38;5;137m\]'
 	nocol='\[\e[0m\]'
@@ -161,7 +161,6 @@ gen_ps1 () {
 	if is_git_prompt_useful_here; then
 		branch=$(parse_git_branch)
 		status=$(gen_git_status)
-
 
 		git_prompt="${branch}"
 		test -n "$status" && git_prompt+=" ${bright_cyan}${status}${nocol}"
@@ -195,11 +194,12 @@ gen_ps1 () {
 	# Shows current Kubernetes context if user asked and there is one
 	if ! test -z "$SHOW_K8S" || ! test -z "$SHOW_K8S_NS"; then
 		kube_config="${KUBECONFIG:-${HOME}/.kube/config}"
-		k8s_context=$(cat "$kube_config" | grep current-context | cut -d\  -f2 | cut -d/ -f1 )
+		k8s_context=$(kubectl config current-context | cut -d\  -f2 | cut -d/ -f1 )
 
 		# Show Kubernetes namespace if user asked, and it is not default one
 		if ! test -z "$SHOW_K8S_NS"; then
-			k8s_ns=$(cat "$kube_config" | yq r -j - | ctx="$k8s_context" jq -r '.contexts[] | select(.name | contains($ENV.ctx)) | .context.namespace')
+			k8s_ns=$(kubectl config view --minify -o json | jq -r '.contexts[0].context.namespace')
+
 			if [[ "$k8s_ns" != "default" && "$k8s_ns" != "" && "$k8s_ns" != "null" ]]; then
 				k8s_ns=$(printf " %s" "$k8s_ns")
 			else
@@ -208,7 +208,7 @@ gen_ps1 () {
 		fi
 
 		test ! -z "$SHOW_K8S" && k8s_context="${k8s_context}:" || k8s_context=""
-		k8s=" ${div}${green}${k8s_context}${bright_green}${k8s_ns}${nocol}"
+		k8s=" ${div}${green}${k8s_context}${orange}${k8s_ns}${nocol}"
 	fi
 
 	top="${mdiv}${magenta}${MY_HOST_NICKNAME}${nocol}${root}"
