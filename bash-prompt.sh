@@ -1,14 +1,17 @@
 #!/bin/bash
 
+
 is_git_prompt_useful_here () {
 	git rev-parse HEAD &> /dev/null || return 1
 
 	return 0
 }
 
+
 parse_git_branch () {
 	git branch | sed -e '/^[^*]/d' -e 's/* \(.*\)/\1/'
 }
+
 
 parse_git_ahead_behind () {
 	local curr_branch
@@ -44,6 +47,7 @@ parse_git_ahead_behind () {
 	test -n "$ab" && printf "$ab" || printf ''
 }
 
+
 parse_git_last_fetch () {
 	local f
 	local now
@@ -57,6 +61,7 @@ parse_git_last_fetch () {
 
 	test -n "$last_fetch" && test $(( now > (last_fetch + 15*60) )) -eq 1 && printf '☇' || printf ''
 }
+
 
 parse_git_status () {
 	local bits
@@ -86,6 +91,7 @@ parse_git_status () {
 	)
 }
 
+
 gen_git_status () {
 	local ahead_behind
 	local fetch
@@ -99,6 +105,51 @@ gen_git_status () {
 	test -n "$fetch" && test -n "$status" && status+=" ${fetch}" || status+="${fetch}"
 
 	printf "$status"
+}
+
+now () {
+	[[ $(uname -s) == 'Darwin' ]] && gdate +%s%N \
+	|| date +%s%N
+}
+
+
+# Function calls to skip for the DEBUG trap
+SKIP_FUNCS=(__zoxide_hook gen_ps1)
+
+
+debug () {
+	# Skip for specific functions, during startup, in command chains and during completion
+	[[ " ${SKIP_FUNCS[@]} " =~ " $BASH_COMMAND " ]] && return
+	[[ -z $PROMPT_LOADED ]] && return
+	[[ -z $PROMPT_ACTIVE ]] && return
+	[[ -n $COMP_LINE ]] && return
+
+	# Indicate the beginning of a command chain
+	unset PROMPT_ACTIVE
+
+	cmd_start_time=$(now)
+}
+
+format_time () {
+	local formatted_time=$(( $1 / 1000 ))
+
+	local us=$(( formatted_time % 1000 ))
+	local ms=$(( (formatted_time / 1000) % 1000 ))
+	local s=$(( (formatted_time / 1000000) % 60 ))
+	local m=$(( (formatted_time / 60000000) % 60 ))
+	local h=$(( formatted_time / 3600000000 ))
+
+	# Goal: always show around 3 digits of accuracy
+	if (( h > 0 )); then formatted_time=${h}h${m}m
+	elif ((m > 0)); then formatted_time=${m}m${s}s
+	elif ((s >= 10)); then formatted_time=${s}.$((ms / 100))s
+	elif ((s > 0)); then formatted_time=${s}.$(printf %03d $ms)s
+	elif ((ms >= 100)); then formatted_time=${ms}ms
+	elif ((ms > 0)); then formatted_time=${ms}.$((us / 100))ms
+	else formatted_time=${us}us
+	fi
+
+	echo "$formatted_time"
 }
 
 gen_ps1 () {
@@ -146,11 +197,22 @@ gen_ps1 () {
 	brown='\[\e[38;5;137m\]'
 	nocol='\[\e[0m\]'
 
-	# Indicate if previous command succeeded or not
 	prompt='$ '
 	div="${grey}|${nocol} "
 	mdiv='⎨ '
 	ediv=' ⎬'
+
+	# How long did it take to run the previous command? Only display if the user ran a
+	# command since last time prompt was shown and SHOW_CMD_TIME is set
+	if test -n "$SHOW_CMD_TIME" && test -n "$PROMPT_LOADED" && test ! "$cmd_start_time" == "$PREV_START_TIME"; then
+		local cmd_timer=$(( $(now) - cmd_start_time ))
+		PREV_START_TIME="$cmd_start_time"
+
+		cmd_timer=$(format_time "$cmd_timer")
+		cmd_timer=" ${grey}${cmd_timer}${nocol}"
+	fi
+
+	# Indicate if previous command succeeded or not
 	test ${ec} -eq 0 && prompt="${prompt}" || prompt="${red}${prompt}"
 
 	# If inside git managed directory show git information
@@ -211,11 +273,20 @@ gen_ps1 () {
 		k8s=" ${div}${green}${k8s_context}${orange}${k8s_ns}${nocol}"
 	fi
 
+	# For detecting the first invocation
+	[[ -n $PROMPT_LOADED ]] || PROMPT_LOADED=t
+
+	# For tracking the start of command chains
+	PROMPT_ACTIVE=t
+
+	# Final formatting
 	top="${mdiv}${magenta}${MY_HOST_NICKNAME}${nocol}${root}"
 	bottom="${prompt}${nocol}"
 
-	PS1="${top}${venv}${aws_profile}${k8s}${git_prompt} ${div}${brown}\\w${nocol}${ediv}\\n${bottom}"
+	PS1="${top}${venv}${aws_profile}${k8s}${git_prompt} ${div}${brown}\\w${nocol}${cmd_timer}${ediv}\\n${bottom}"
 }
 
+
 unset PS1
+trap 'debug' DEBUG
 PROMPT_COMMAND=gen_ps1

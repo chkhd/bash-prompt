@@ -2,7 +2,7 @@
 
 ![Screenshot](screenshot.png)
 
-A simple and beautiful bash prompt that also prints some venv, git, aws, and k8s information, without any other bells and whistles.
+A simple and beautiful bash prompt that also prints command execution time, venv, git, aws, and k8s information.
 
 - Shows if a git fetch has not been run for 15 minutes with `☇` character
 - Summarizes git status with single letters
@@ -14,6 +14,7 @@ A simple and beautiful bash prompt that also prints some venv, git, aws, and k8s
 - Configurable host nickname, if not set hostname will be shown
 - Can display currently active AWS profile, if `$AWS_PROFILE` is set and user sets `$SHOW_AWS_PROFILE`
 - Can display current Kubernetes context and namespace, enable through `$SHOW_K8S` and `$SHOW_K8S_NS`.
+- Can display how long it took to run the previous command, enable by setting `$SHOW_CMD_TIME`.
 
 NOTE: if the K8s context contains `/` in its title, only the part before `/` gets displayed.
 
@@ -26,8 +27,12 @@ echo 'MY_HOST_NICKNAME=whateveryoulike' >> ~/.bashrc
 echo 'SHOW_AWS_PROFILE=true' >> ~/.bashrc
 echo 'SHOW_K8S=true' >> ~/.bashrc
 
+# This requires coreutils to be properly installed and be on the PATH
+# brew install coreutils
+echo 'SHOW_CMD_TIME=true' >> ~/.bashrc
+
 # If you want to display the namespace install jq[1]
-# brew install jq yq
+# brew install jq
 # echo 'SHOW_K8S_NS=true' >> ~/.bashrc
 
 echo 'source ~/.bash-prompt/bash-prompt.sh' >> ~/.bashrc
@@ -42,7 +47,7 @@ I use this regularly on MacOS and Linux with latest Bash and Git, no plans to su
 
 ### License
 
-Copyright 2019-2020 David Chkhikvadze
+Copyright 2019-2021 David Chkhikvadze
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
 
