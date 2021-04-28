@@ -293,7 +293,7 @@ gen_ps1 () {
 
 	# Current IBM Cloud account name and region
 	ibm_acct_info=$(gen_ibm_account_info)
-	if test "$?" -eq 0 && ! test -z "$ibm_acct_info"; then
+	if ! test -z "$ibm_acct_info"; then
 		ibm_acct_info=" ${div}${magenta}${ibm_acct_info}${nocol}"
 	fi
 
