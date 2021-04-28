@@ -107,6 +107,22 @@ gen_git_status () {
 	printf "$status"
 }
 
+
+gen_ibm_account_info () {
+	local config="$HOME/.bluemix/config.json"
+
+	if ! test -f "$config"; then
+		return ""
+	fi
+
+	local account_name=$(jq -r '.Account.Name' < "$config")
+	# local account_region=$(jq -r '.Region' < "$config")
+
+	# printf "${account_name}/${account_region}"
+	printf "${account_name}"
+}
+
+
 now () {
 	[[ $(uname -s) == 'Darwin' ]] && gdate +%s%N \
 	|| date +%s%N
@@ -213,7 +229,9 @@ gen_ps1 () {
 	fi
 
 	# Indicate if previous command succeeded or not
-	test ${ec} -eq 0 && prompt="${prompt}" || prompt="${red}${prompt}"
+	if ! test ${ec} -eq 0; then
+		prompt="${red}${prompt}"
+	fi
 
 	# If inside git managed directory show git information
 	git_prompt=''
@@ -263,14 +281,20 @@ gen_ps1 () {
 			k8s_ns=$(kubectl config view --minify -o json | jq -r '.contexts[0].context.namespace')
 
 			if [[ "$k8s_ns" != "default" && "$k8s_ns" != "" && "$k8s_ns" != "null" ]]; then
-				k8s_ns=$(printf " %s" "$k8s_ns")
+				k8s_ns=$(printf "%s" "$k8s_ns")
 			else
 				k8s_ns=""
 			fi
 		fi
 
-		test ! -z "$SHOW_K8S" && k8s_context="${k8s_context}:" || k8s_context=""
+		test ! -z "$SHOW_K8S" && k8s_context="${k8s_context}${grey}/${nocol}" || k8s_context=""
 		k8s=" ${div}${green}${k8s_context}${orange}${k8s_ns}${nocol}"
+	fi
+
+	# Current IBM Cloud account name and region
+	ibm_acct_info=$(gen_ibm_account_info)
+	if ! test -z "$ibm_acct_info"; then
+		ibm_acct_info=" ${div}${magenta}${ibm_acct_info}${nocol}"
 	fi
 
 	# For detecting the first invocation
@@ -280,10 +304,10 @@ gen_ps1 () {
 	PROMPT_ACTIVE=t
 
 	# Final formatting
-	top="${mdiv}${magenta}${MY_HOST_NICKNAME}${nocol}${root}"
+	top="${mdiv}${orange}${MY_HOST_NICKNAME}${nocol}${root}"
 	bottom="${prompt}${nocol}"
 
-	PS1="${top}${venv}${aws_profile}${k8s}${git_prompt} ${div}${brown}\\w${nocol}${cmd_timer}${ediv}\\n${bottom}"
+	PS1="${top}${venv}${aws_profile}${k8s}${ibm_acct_info}${git_prompt} ${div}${brown}\\w${nocol}${cmd_timer}${ediv}\\n${bottom}"
 }
 
 
